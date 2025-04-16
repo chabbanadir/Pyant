@@ -1,0 +1,35 @@
+# Pydantic AI and Model Context Protocol (MCP)
+
+Pydantic AI integrates with the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) in several ways:
+
+## 1. Pydantic AI as an MCP Client
+
+*   Pydantic AI [`Agent`](pydantic.txt)s can connect to external MCP servers to utilize their tools.
+*   This allows agents to access functionalities provided by various MCP-compliant services.
+*   Connection is managed by registering [`MCPServer`](pydantic.txt) instances with the agent.
+*   Two primary client connection types are provided:
+    *   [`MCPServerHTTP`](pydantic.txt): Connects to a running MCP server via HTTP using the [SSE transport](https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/transports/#http-with-sse). The server must be running independently.
+    *   [`MCPServerStdio`](pydantic.txt): Runs an MCP server as a subprocess and communicates via stdin/stdout using the [stdio transport](https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/transports/#stdio). Pydantic AI manages the subprocess lifecycle via `agent.run_mcp_servers()`.
+
+## 2. Pydantic AI within MCP Servers
+
+*   Pydantic AI models and agents can be incorporated into the logic of tools within an MCP server.
+*   This allows developers to build MCP servers that leverage Pydantic AI's capabilities (e.g., using an agent to generate content within a server tool).
+
+## 3. Pydantic AI Provided MCP Servers
+
+*   Pydantic AI develops and provides MCP servers to offer specific functionalities.
+*   **MCP Run Python**: ([`jsr:@pydantic/mcp-run-python`](pydantic.txt)) An MCP server that executes Python code securely in a sandboxed environment using Pyodide and Deno. This allows agents to run arbitrary Python code safely. It can be run using `deno run` and supports both `stdio` and `sse` transports.
+
+## Key Classes and Concepts
+
+*   [`pydantic_ai.mcp.MCPServer`](pydantic.txt): Abstract base class for MCP server connections.
+*   [`pydantic_ai.mcp.MCPServerHTTP`](pydantic.txt): Client for connecting to MCP servers over HTTP SSE.
+*   [`pydantic_ai.mcp.MCPServerStdio`](pydantic.txt): Client for running and connecting to MCP servers as subprocesses via stdio.
+*   [`pydantic_ai.Agent`](pydantic.txt): The core agent class, configured with `mcp_servers` to connect to MCP services.
+*   `agent.run_mcp_servers()`: Async context manager to manage the lifecycle of MCP connections, especially for `MCPServerStdio`.
+
+## Installation
+
+*   MCP integration requires the `mcp` optional dependency group: `pip install "pydantic-ai-slim[mcp]"` or `uv add "pydantic-ai-slim[mcp]"`.
+*   Requires Python 3.10+.
